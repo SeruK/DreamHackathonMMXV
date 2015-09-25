@@ -85,6 +85,27 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &56660709 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 113184, guid: 85ff226ac55a044dda8f1ffb19c4fa65, type: 2}
+  m_PrefabInternal: {fileID: 168900176}
+--- !u!114 &56660710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 56660709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77b1b640ba94b4d00913df74c023a555, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coll: {fileID: 56660711}
+--- !u!64 &56660711 stripped
+MeshCollider:
+  m_PrefabParentObject: {fileID: 6447962, guid: 85ff226ac55a044dda8f1ffb19c4fa65,
+    type: 2}
+  m_PrefabInternal: {fileID: 168900176}
 --- !u!1001 &168900176
 Prefab:
   m_ObjectHideFlags: 0

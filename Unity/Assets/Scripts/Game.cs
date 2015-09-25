@@ -4,7 +4,6 @@ using System.Collections;
 
 public class Game : MonoBehaviour {
 	protected void OnEnable() {
-		StartTimer( 1.0f, ( float dt ) => { Debug.Log( "dt: " + dt ); } ); 
 	}
 
 	protected void Update() {
