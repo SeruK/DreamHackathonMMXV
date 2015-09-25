@@ -312,6 +312,10 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: states.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 453634, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -356,6 +360,22 @@ Prefab:
       propertyPath: touchTexture
       value: 
       objectReference: {fileID: 2800000, guid: ee99893dc4a304b4c928664a183935ca, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: dragClip
+      value: 
+      objectReference: {fileID: 8300000, guid: fb59f35c2de664259937d94d0a313b01, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: skinTexture
+      value: 
+      objectReference: {fileID: 2800000, guid: 405905de48c6f4415978c2b9f27dafd8, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: states.Array.data[0].name
+      value: Scratch
+      objectReference: {fileID: 0}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: states.Array.data[0].dragClip
+      value: 
+      objectReference: {fileID: 8300000, guid: fb59f35c2de664259937d94d0a313b01, type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
   m_IsPrefabParent: 0

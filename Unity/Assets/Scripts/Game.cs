@@ -3,74 +3,68 @@ using System;
 using System.Collections;
 
 public class Game : MonoBehaviour {
-	private enum SkinState {
-		None,
-		Scratch,
-		Cat,
-		Female,
-		PullOff,
-		PullOffNoises
+	[Serializable]
+	public class State {
+		public string name;
+		public AudioClip tapClip;
+		public AudioClip dragClip;
+		public bool peelSkin;
 	}
-
+	
+	[SerializeField]
+	private State[] states = new State[ 0 ];
 	[SerializeField]
 	private GameObject skinPrefab;
 	[SerializeField]
 	private Texture2D touchTexture;
-
 	[SerializeField]
-	private AudioClip tapClip;
-	[SerializeField]
-	private AudioClip dragClip;
+	private Texture2D skinTexture;
 
 	private GameObject skin;
 	private float touchAlpha;
 	private Vector2 touchPos;
-	private bool peelSkin = true;
 
+	private AudioSource audioSource;
 	private Coroutine touchFadeTimer;
 
 	protected void OnEnable() {
-		SetState( SkinState.Scratch );
+		audioSource = GetComponent<AudioSource>();
+		ApplyState( states[ 0 ] );
 	}
 
-	private void SetState( SkinState state ) {
-		if( skin != null ) {
-			var oldSkin = skin;
-			skin.GetComponent<GestureRecognizer>().Reset();
-			var renderer = skin.GetComponent<MeshRenderer>();
-			Vector3 from = skin.transform.position;
-			Vector3 to   = from - new Vector3( 5, 0, 0 );
-			Color color = renderer.material.color;
-			StartTimer( 1.0f, ( float dt ) => {
-				oldSkin.transform.position = Vector3.Lerp( from, to, dt );
-				oldSkin.transform.localScale = Vector3.Lerp( new Vector3( 1, 1, 1 ), Vector3.zero, dt );
-//				color.a = 1.0f - dt;
-//				renderer.material.color = color;
-			}, () => {
-				Destroy( oldSkin.gameObject );
-			} );
-			skin = null;
+	private void ApplyState( State state ) {
+		if( skin == null ) {
+			skin = Instantiate( skinPrefab ) as GameObject;
 		}
 
-		if( state == SkinState.None ) {
-			return;
-		}
-
-		skin = Instantiate( skinPrefab ) as GameObject;
 		var gesture = skin.GetComponent<GestureRecognizer>();
 		gesture.OnDragStarted = ( Vector2 mousePos ) => {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = dt; } );
 			touchPos = mousePos;
+			if( state.dragClip ) {
+				audioSource.clip = state.dragClip;
+				audioSource.loop = true;
+				if( !audioSource.isPlaying ) {
+					audioSource.Play();
+				}
+				audioSource.UnPause();
+			}
 		};
 
 		gesture.OnDrag = ( Vector2 mousePos ) => {
 			touchPos = mousePos;
-			if( peelSkin ) {
+			if( state.peelSkin ) {
 				PeelSkin( mousePos );
 			}
 		};
 		gesture.OnDragEnded = ( Vector2 mousePos ) => {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = 1.0f - dt; } );
+			audioSource.Pause();
+		};
+		gesture.OnTapped = () => {
+			if( state.tapClip ) {
+				audioSource.PlayOneShot( state.tapClip );
+			}
 		};
 	}
 
