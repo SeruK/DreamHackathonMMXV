@@ -17,17 +17,20 @@ public class Game : MonoBehaviour {
 	[SerializeField]
 	private Texture2D touchTexture;
 
+	[SerializeField]
+	private AudioClip tapClip;
+	[SerializeField]
+	private AudioClip dragClip;
+
 	private GameObject skin;
 	private float touchAlpha;
 	private Vector2 touchPos;
+	private bool peelSkin = true;
 
 	private Coroutine touchFadeTimer;
 
 	protected void OnEnable() {
 		SetState( SkinState.Scratch );
-		StartTimer( 5.0f, ( float dt ) => {}, () => {
-			SetState( SkinState.None );
-		} );
 	}
 
 	private void SetState( SkinState state ) {
@@ -59,12 +62,64 @@ public class Game : MonoBehaviour {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = dt; } );
 			touchPos = mousePos;
 		};
+
 		gesture.OnDrag = ( Vector2 mousePos ) => {
 			touchPos = mousePos;
+			if( peelSkin ) {
+				PeelSkin( mousePos );
+			}
 		};
 		gesture.OnDragEnded = ( Vector2 mousePos ) => {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = 1.0f - dt; } );
 		};
+	}
+
+	private void PeelSkin( Vector2 mousePos ) {
+		Ray ray = Camera.main.ScreenPointToRay( mousePos );
+		RaycastHit hit;
+		if( Physics.Raycast( ray, out hit ) ) {
+			var collider = skin.GetComponent<Collider>();
+
+			if( hit.collider != collider ) {
+				return;
+			}
+
+			var skinRenderer = skin.GetComponent<MeshRenderer>();
+			Texture2D tex = Instantiate( skinRenderer.material.mainTexture as Texture2D );
+			Color32[] pixels = tex.GetPixels32();
+
+			Vector2 uv;
+			uv.x = (hit.point.x - hit.collider.bounds.min.x) / hit.collider.bounds.size.x;
+			uv.y = (hit.point.y - hit.collider.bounds.min.y) / hit.collider.bounds.size.y;
+
+			// Now this is some butt-ugly code
+			int radius = 12;
+			int uvx = (int)( uv.x * tex.width), uvy = (int)( uv.y * tex.height );
+			int minx = Mathf.Max( uvx - radius, 0 );
+			int maxx = Mathf.Min( uvx + radius, tex.width - 1 );
+			int miny = Mathf.Max( uvy - radius, 0 );
+			int maxy = Mathf.Min( uvy + radius, tex.height -1 );
+
+			for( int x = minx; x <= maxx; ++x ) {
+				for( int y = miny; y <= maxy; ++y ) {
+					float dist = Vector2.Distance( new Vector2( uvx, uvy ), new Vector2( x, y ) );
+					if( dist > radius ) {
+						continue;
+					}
+					int index = x + y * tex.width;
+					Color32 color = pixels[ index ];
+					float oldAlpha = (float)color.a;
+					float newAlpha = 0;//255.0f * ( dist / radius );
+					color.a = (byte)Mathf.Min( oldAlpha, newAlpha );
+					pixels[ index ] = color;
+				}
+			}
+
+			tex.SetPixels32( pixels );
+
+			tex.Apply();
+			skinRenderer.material.mainTexture = tex;
+		}
 	}
 
 	// Timers
