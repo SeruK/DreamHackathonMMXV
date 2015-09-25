@@ -3,6 +3,15 @@ using System;
 using System.Collections;
 
 public class Game : MonoBehaviour {
+	private enum SkinState {
+		None,
+		Scratch,
+		Cat,
+		Female,
+		PullOff,
+		PullOffNoises
+	}
+
 	[SerializeField]
 	private GameObject skinPrefab;
 	[SerializeField]
@@ -15,6 +24,35 @@ public class Game : MonoBehaviour {
 	private Coroutine touchFadeTimer;
 
 	protected void OnEnable() {
+		SetState( SkinState.Scratch );
+		StartTimer( 5.0f, ( float dt ) => {}, () => {
+			SetState( SkinState.None );
+		} );
+	}
+
+	private void SetState( SkinState state ) {
+		if( skin != null ) {
+			var oldSkin = skin;
+			skin.GetComponent<GestureRecognizer>().Reset();
+			var renderer = skin.GetComponent<MeshRenderer>();
+			Vector3 from = skin.transform.position;
+			Vector3 to   = from - new Vector3( 5, 0, 0 );
+			Color color = renderer.material.color;
+			StartTimer( 1.0f, ( float dt ) => {
+				oldSkin.transform.position = Vector3.Lerp( from, to, dt );
+				oldSkin.transform.localScale = Vector3.Lerp( new Vector3( 1, 1, 1 ), Vector3.zero, dt );
+//				color.a = 1.0f - dt;
+//				renderer.material.color = color;
+			}, () => {
+				Destroy( oldSkin.gameObject );
+			} );
+			skin = null;
+		}
+
+		if( state == SkinState.None ) {
+			return;
+		}
+
 		skin = Instantiate( skinPrefab ) as GameObject;
 		var gesture = skin.GetComponent<GestureRecognizer>();
 		gesture.OnDragStarted = ( Vector2 mousePos ) => {
@@ -54,6 +92,7 @@ public class Game : MonoBehaviour {
 		while( elapsed < duration ) {
 			yield return null;
 			float dt = Time.time - t;
+			t = Time.time;
 			elapsed += dt;
 			tick( Mathf.Min( elapsed / duration, 1.0f ) );
 		}

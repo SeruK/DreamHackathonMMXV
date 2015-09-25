@@ -273,7 +273,7 @@ Prefab:
     - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
       propertyPath: skinPrefab
       value: 
-      objectReference: {fileID: 113184, guid: 85ff226ac55a044dda8f1ffb19c4fa65, type: 2}
+      objectReference: {fileID: 119184, guid: 85ff226ac55a044dda8f1ffb19c4fa65, type: 2}
     - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
       propertyPath: touch
       value: 

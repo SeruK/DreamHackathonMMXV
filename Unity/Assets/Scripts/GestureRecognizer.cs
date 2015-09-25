@@ -19,6 +19,13 @@ public class GestureRecognizer : MonoBehaviour {
 	private bool isDragging;
 	private bool didMove;
 
+	public void Reset() {
+		OnTapped = null;
+		OnDragStarted = null;
+		OnDrag = null;
+		OnDragEnded = null;
+	}
+
 	protected void Update() {
 		// MouseButton( 0 ) == Finger
 		if( Input.GetMouseButtonDown( 0 ) ) {
