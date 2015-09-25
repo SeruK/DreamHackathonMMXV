@@ -7,12 +7,12 @@ public class GestureRecognizer : MonoBehaviour {
 	private Collider coll;
 
 	public Action OnTapped;
-	public Action OnDragStarted;
-	public Action OnDrag;
-	public Action OnDragEnded;
+	public Action<Vector2> OnDragStarted;
+	public Action<Vector2> OnDrag;
+	public Action<Vector2> OnDragEnded;
 
 	private float startTimeStamp;
-	private float lastTimeStamp;
+//	private float lastTimeStamp;
 	private float lastDragTimeStamp;
 
 	private Vector2 lastTouchPos;
@@ -35,7 +35,7 @@ public class GestureRecognizer : MonoBehaviour {
 			}
 
 			startTimeStamp = Time.time;
-			lastTimeStamp = Time.time;
+//			lastTimeStamp = Time.time;
 			lastTouchPos = Input.mousePosition;
 			didMove = false;
 			isDragging = false;
@@ -49,12 +49,12 @@ public class GestureRecognizer : MonoBehaviour {
 				if( !isDragging ) {
 					isDragging = true;
 					if( OnDragStarted != null ) {
-						OnDragStarted();
+						OnDragStarted( Input.mousePosition );
 					}
 				}
 
 				if( OnDrag != null ) {
-					OnDrag();
+					OnDrag( Input.mousePosition );
 				}
 			} else {
 				float deltaTime = Time.time - lastDragTimeStamp;
@@ -62,12 +62,12 @@ public class GestureRecognizer : MonoBehaviour {
 				if( isDragging && deltaTime > 0.1f ) {
 					isDragging = false;
 					if( OnDragEnded != null ) {
-						OnDragEnded();
+						OnDragEnded( Input.mousePosition );
 					}
 				}
 			}
 
-			lastTimeStamp = Time.time;
+//			lastTimeStamp = Time.time;
 			lastTouchPos = Input.mousePosition;
 		} else if( Input.GetMouseButtonUp( 0 ) ) {
 			float deltaTime = Time.time - startTimeStamp;
@@ -83,7 +83,7 @@ public class GestureRecognizer : MonoBehaviour {
 				if( isDragging ) {
 					isDragging = false;
 					if( OnDragEnded != null ) {
-						OnDragEnded();
+						OnDragEnded( Input.mousePosition );
 					}
 				}
 			}
