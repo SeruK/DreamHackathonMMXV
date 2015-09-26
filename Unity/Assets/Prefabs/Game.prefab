@@ -110,16 +110,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbe87f317af7e4130aa4c9b72dfb46f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  states:
-  - name: Scratch
-    tapClip: {fileID: 0}
-    dragClip: {fileID: 8300000, guid: fb59f35c2de664259937d94d0a313b01, type: 3}
-    peelSkin: 0
   skinPrefab: {fileID: 119184, guid: 85ff226ac55a044dda8f1ffb19c4fa65, type: 2}
   touchTexture: {fileID: 2800000, guid: ee99893dc4a304b4c928664a183935ca, type: 3}
   skinTexture: {fileID: 2800000, guid: 405905de48c6f4415978c2b9f27dafd8, type: 3}
   titleText: {fileID: 0}
   headlineText: {fileID: 0}
+  nextButton: {fileID: 0}
+  skipIntro: 1
+  clips:
+    catMeow:
+      clip: {fileID: 8300000, guid: cbbb83d31c4474004a5636d0c115e591, type: 3}
+      volume: .600000024
+      vibrates: 1
+    catPurr:
+      clip: {fileID: 8300000, guid: b76a8adba8c0f4709be48f2fe25fd9b1, type: 3}
+      volume: 1
+      vibrates: 1
+    laugh:
+      clip: {fileID: 0}
+      volume: 1
+      vibrates: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

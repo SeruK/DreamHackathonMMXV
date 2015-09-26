@@ -4,15 +4,20 @@ using System.Collections;
 
 public class Game : MonoBehaviour {
 	[Serializable]
-	public class State {
-		public string name;
-		public AudioClip tapClip;
-		public AudioClip dragClip;
-		public bool peelSkin;
+	public class Audio {
+		public AudioClip clip;
+		public float volume = 1.0f;
+		public bool vibrates;
 	}
-	
-	[SerializeField]
-	private State[] states = new State[ 0 ];
+
+	[Serializable]
+	public class AudioClips {
+		public Audio catMeow;
+		public Audio catPurr;
+		public Audio laugh;
+		public Audio moan;
+	};
+
 	[SerializeField]
 	private GameObject skinPrefab;
 	[SerializeField]
@@ -23,6 +28,12 @@ public class Game : MonoBehaviour {
 	private UnityEngine.UI.Text titleText;
 	[SerializeField]
 	private UnityEngine.UI.Text headlineText;
+	[SerializeField]
+	private UnityEngine.UI.Button nextButton;
+	[SerializeField]
+	private bool skipIntro;
+	[SerializeField]
+	private AudioClips clips;
 
 	private float titleTextAlpha {
 		get { return titleText.color.a; }
@@ -32,44 +43,132 @@ public class Game : MonoBehaviour {
 		get { return headlineText.color.a; }
 		set { var c = headlineText.color; c.a = value; headlineText.color = c; }
 	}
+	private float nextButtonAlpha {
+		get { return nextButton.colors.normalColor.a; }
+		set { var c = nextButton.colors; var c2 = c.normalColor; c2.a = value; c.normalColor = c2; nextButton.colors = c; }
+	}
 
 	private GameObject skinGO;
 	private Skin skin;
 	private float touchAlpha;
 	private Vector2 touchPos;
+	private bool shaking;
+
+	private Audio tapAudio;
+	private Audio strokeAudio;
 
 	private AudioSource audioSource;
 	private Coroutine touchFadeTimer;
 	private Coroutine skinTimer;
+	private Action OnNextButtonClicked;
 
 	protected void OnEnable() {
 		audioSource = GetComponent<AudioSource>();
-		ApplyState( states[ 0 ] );
+		Setup();
 		headlineTextAlpha = 0.0f;
 		titleTextAlpha = 0.0f;
 		skin.Alpha = 0.0f;
+		nextButtonAlpha = 0.0f;
 
-		StartTimer( 2.0f, () => {
-			StartTimer( 4.0f, ( float dt ) => {
-				titleTextAlpha = dt;
-			}, 3.0f, () => {
+		if( !skipIntro ) {
+			StartTimer( 2.0f, () => {
 				StartTimer( 4.0f, ( float dt ) => {
-					titleTextAlpha = 1.0f - dt;
-					skin.Alpha = dt;
-				}, () => {
-					ChangeColor();
+					titleTextAlpha = dt;
+				}, 1.0f, () => {
+					StartTimer( 2.0f, ( float dt ) => {
+						nextButtonAlpha = dt;
+					}, () => {
+						OnNextButtonClicked = () => {
+							StartTimer( 4.0f, ( float dt ) => {
+								titleTextAlpha = 1.0f - dt;
+								skin.Alpha = dt;
+							}, () => {
+								InitialState();
+							} );
+						};
+					} );
 				} );
 			} );
-		} );
+		} else {
+			nextButtonAlpha = 1.0f;
+			skin.Alpha = 1.0f;
+			InitialState();
+		}
 	}
 
-	private void ChangeColor() {
-		headlineText.text = "A change of value";
+	protected void Update() {
+		if( shaking ) {
+			skin.transform.position = UnityEngine.Random.insideUnitCircle * 0.01f;
+		} else {
+			skin.transform.position = Vector3.zero;
+		}
+	}
+
+	// States
+
+	private void InitialState() {
+		FadeInHeadline( "A piece of skin" );
+
+		OnNextButtonClicked = () => {
+			FadeOutHeadline( () => {
+				ChangeColorState();
+			} ); 
+		};
+	}
+
+	private void ChangeColorState() {
+		FadeInHeadline( "Shade" );
+
+		TickTockSkinValue( 1.0f, 0.5f );
+
+		OnNextButtonClicked = () => {
+			if( skinTimer != null ) {
+				StopCoroutine( skinTimer );
+			}
+			FadeOutHeadline( () => {
+				CatState();
+			} );
+		};
+	}
+
+	private void CatState() {
+		FadeInHeadline( "Sleek Siamese" );
+
+		SetTapAudio( clips.catMeow );
+		SetStrokeAudio( clips.catPurr );
+
+		OnNextButtonClicked = () => {
+			if( skinTimer != null ) {
+				StopCoroutine( skinTimer );
+			}
+			FadeOutHeadline( () => {
+				MoanState();
+			} );
+		};
+	}
+
+	private void MoanState() {
+		FadeInHeadline( "Intimidating Intimacy" );
+
+		SetTapAudio( null );
+		SetStrokeAudio( clips.moan );
+	}
+
+	// Headline
+
+	private void FadeInHeadline( string text ) {
+		headlineText.text = text;
 		StartTimer( 2.0f, ( float dt ) => {
 			headlineTextAlpha = dt;
 		} );
+	}
 
-		TickTockSkinValue( 1.0f, 0.5f );
+	private void FadeOutHeadline( Action done ) {
+		StartTimer( 2.0f, ( float dt ) => {
+			headlineTextAlpha = 1.0f - dt;
+		}, () => {
+			done();
+		} );
 	}
 
 	private void TickTockSkinValue( float from, float to ) {
@@ -77,12 +176,12 @@ public class Game : MonoBehaviour {
 			var c = skin.Color;
 			HSV.SetValue( ref c, Mathf.Lerp( from, to, dt ) );
 			skin.Color = c;
-		}, 2.0f, () => {
+		}, () => {
 			TickTockSkinValue( to, from );
 		} );
 	}
 
-	private void ApplyState( State state ) {
+	private void Setup() {
 		if( skinGO == null ) {
 			skinGO = Instantiate( skinPrefab, Vector3.zero, Quaternion.identity ) as GameObject;
 			skin = skinGO.GetComponent<Skin>();
@@ -92,29 +191,33 @@ public class Game : MonoBehaviour {
 		gesture.OnDragStarted = ( Vector2 mousePos ) => {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = dt; } );
 			touchPos = mousePos;
-			if( state.dragClip ) {
-				audioSource.clip = state.dragClip;
-				audioSource.loop = true;
-				if( !audioSource.isPlaying ) {
-					audioSource.Play();
-				}
-				audioSource.UnPause();
+			if( !audioSource.isPlaying ) {
+				audioSource.Play();
 			}
+			audioSource.UnPause();
 		};
 
 		gesture.OnDrag = ( Vector2 mousePos ) => {
 			touchPos = mousePos;
-			if( state.peelSkin ) {
-				PeelSkin( mousePos );
+			if( strokeAudio != null && strokeAudio.vibrates ) {
+				shaking = true;
 			}
 		};
 		gesture.OnDragEnded = ( Vector2 mousePos ) => {
 			StartTimer( ref touchFadeTimer, 0.5f, ( float dt ) => { touchAlpha = 1.0f - dt; } );
 			audioSource.Pause();
+			shaking = false;
 		};
 		gesture.OnTapped = () => {
-			if( state.tapClip ) {
-				audioSource.PlayOneShot( state.tapClip );
+			audioSource.Stop();
+			if( tapAudio != null ) {
+				audioSource.PlayOneShot( tapAudio.clip, tapAudio.volume );
+				if( tapAudio.vibrates ) {
+					shaking = true;
+					StartTimer( 0.3f, () => {
+						shaking = false;
+					} );
+				}
 			}
 		};
 	}
@@ -173,14 +276,29 @@ public class Game : MonoBehaviour {
 		}
 	}
 
+	private void SetTapAudio( Audio a ) {
+		tapAudio = a;
+	}
+
+	private void SetStrokeAudio( Audio a ) {
+		audioSource.Stop();
+		strokeAudio = a;
+		if( a == null ) {
+			return;
+		}
+		audioSource.clip = a.clip;
+		audioSource.volume = a.volume;
+		audioSource.loop = true;
+	}
+
 	// Timers
 
 	private Coroutine StartTimer( ref Coroutine c, float duration, Action<float> tick ) {
-		if( c != null ) {
-			StopCoroutine( c );
-		}
-		c = StartTimer( duration, tick );
-		return c;
+		return StartTimer( ref c, duration, tick, 0.0f, null );
+	}
+
+	private Coroutine StartTimer( ref Coroutine c, float duration, Action<float> tick, Action done ) {
+		return StartTimer( ref c, duration, tick, 0.0f, done );
 	}
 
 	private Coroutine StartTimer( ref Coroutine c, float duration, Action<float> tick, float wait, Action done ) {
@@ -241,6 +359,14 @@ public class Game : MonoBehaviour {
 			GUI.color = new Color( 1, 1, 1, touchAlpha );
 			var rect = new Rect( touchPos.x - 32, Screen.height - touchPos.y - 32, 64, 64 );
 			GUI.DrawTexture( rect, touchTexture );	
+		}
+	}
+
+	// Callback
+
+	public void NextButtonClicked() {
+		if( OnNextButtonClicked != null ) {
+			OnNextButtonClicked();
 		}
 	}
 }

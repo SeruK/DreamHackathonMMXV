@@ -18,6 +18,7 @@ public class GestureRecognizer : MonoBehaviour {
 	private Vector2 lastTouchPos;
 	private bool isDragging;
 	private bool didMove;
+	private bool started;
 
 	public void Reset() {
 		OnTapped = null;
@@ -41,12 +42,13 @@ public class GestureRecognizer : MonoBehaviour {
 				}
 			}
 
+			started = true;
 			startTimeStamp = Time.time;
 //			lastTimeStamp = Time.time;
 			lastTouchPos = Input.mousePosition;
 			didMove = false;
 			isDragging = false;
-		} else if( Input.GetMouseButton( 0 ) ) {
+		} else if( started && Input.GetMouseButton( 0 ) ) {
 			Vector2 touchDelta = ( (Vector2)Input.mousePosition ) - lastTouchPos;
 
 			if( touchDelta.magnitude > 0.001f ) {
@@ -76,7 +78,8 @@ public class GestureRecognizer : MonoBehaviour {
 
 //			lastTimeStamp = Time.time;
 			lastTouchPos = Input.mousePosition;
-		} else if( Input.GetMouseButtonUp( 0 ) ) {
+		} else if( started && Input.GetMouseButtonUp( 0 ) ) {
+			started = false;
 			float deltaTime = Time.time - startTimeStamp;
 
 			if( !didMove ) {
