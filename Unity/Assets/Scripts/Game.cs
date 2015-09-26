@@ -106,6 +106,7 @@ public class Game : MonoBehaviour {
 
 	protected void Update() {
 		if( shaking ) {
+			Handheld.Vibrate();
 			skin.transform.position = UnityEngine.Random.insideUnitCircle * 0.01f;
 		} else {
 			skin.transform.position = Vector3.zero;
