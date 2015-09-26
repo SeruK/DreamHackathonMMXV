@@ -6,7 +6,7 @@ public class GestureRecognizer : MonoBehaviour {
 	[SerializeField]
 	private Collider coll;
 
-	public Action OnTapped;
+	public Action<Vector2, Vector2> OnTapped;
 	public Action<Vector2> OnDragStarted;
 	public Action<Vector2> OnDrag;
 	public Action<Vector2> OnDragEnded;
@@ -15,6 +15,8 @@ public class GestureRecognizer : MonoBehaviour {
 //	private float lastTimeStamp;
 	private float lastDragTimeStamp;
 
+	private Vector2 origTouchPos;
+	private Vector2 origTouchHitPos;
 	private Vector2 lastTouchPos;
 	private bool isDragging;
 	private bool didMove;
@@ -40,11 +42,13 @@ public class GestureRecognizer : MonoBehaviour {
 				} else {
 					return;
 				}
+				origTouchHitPos = hitInfo.point;
 			}
 
 			started = true;
 			startTimeStamp = Time.time;
 //			lastTimeStamp = Time.time;
+			origTouchPos = Input.mousePosition;
 			lastTouchPos = Input.mousePosition;
 			didMove = false;
 			isDragging = false;
@@ -86,7 +90,7 @@ public class GestureRecognizer : MonoBehaviour {
 				// Tap
 				if( deltaTime < 0.5f ) {
 					if( OnTapped != null ) {
-						OnTapped();
+						OnTapped( origTouchPos, origTouchHitPos );
 					}
 				}
 			} else {

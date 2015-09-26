@@ -606,6 +606,38 @@ Prefab:
       propertyPath: clips.laugh.clip
       value: 
       objectReference: {fileID: 8300000, guid: c1fadd40f1a444602a91523657d22023, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.moan.clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 91ab72a39e6234fe6b7c71a743c73035, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.moan.vibrates
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.stab.clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 1903dab0fca404d2f87a939caa78f02d, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.stab.vibrates
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: splatterPrefab
+      value: 
+      objectReference: {fileID: 192754, guid: 2aba3d12fe1bc4f98b534df7b60a653a, type: 2}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.torture.clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 0bedd67d786d5446884c8c16eab48d5f, type: 3}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: clips.torture.vibrates
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11403232, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
+      propertyPath: skipIntro
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8922c7303cca043c2974172f6aad3bdc, type: 2}
   m_IsPrefabParent: 0
