@@ -12,6 +12,7 @@ public class Game : MonoBehaviour {
 
 	[Serializable]
 	public class AudioClips {
+		public Audio scratch;
 		public Audio catMeow;
 		public Audio catPurr;
 		public Audio laugh;
@@ -29,8 +30,6 @@ public class Game : MonoBehaviour {
 	[SerializeField]
 	private Texture2D skinTexture;
 	[SerializeField]
-	private Texture2D bloodTexture;
-	[SerializeField]
 	private UnityEngine.UI.Text titleText;
 	[SerializeField]
 	private UnityEngine.UI.Text headlineText;
@@ -40,6 +39,8 @@ public class Game : MonoBehaviour {
 	private bool skipIntro;
 	[SerializeField]
 	private AudioClips clips;
+	[SerializeField]
+	private Audio whoosh;
 
 	private float titleTextAlpha {
 		get { return titleText.color.a; }
@@ -80,14 +81,14 @@ public class Game : MonoBehaviour {
 
 		if( !skipIntro ) {
 			StartTimer( 2.0f, () => {
-				StartTimer( 4.0f, ( float dt ) => {
+				StartTimer( 1.0f, ( float dt ) => {
 					titleTextAlpha = dt;
 				}, 1.0f, () => {
-					StartTimer( 2.0f, ( float dt ) => {
+					StartTimer( 1.0f, ( float dt ) => {
 						nextButtonAlpha = dt;
 					}, () => {
 						OnNextButtonClicked = () => {
-							StartTimer( 4.0f, ( float dt ) => {
+							StartTimer( 1.0f, ( float dt ) => {
 								titleTextAlpha = 1.0f - dt;
 								skin.Alpha = dt;
 							}, () => {
@@ -106,8 +107,10 @@ public class Game : MonoBehaviour {
 
 	protected void Update() {
 		if( shaking ) {
+#if UNITY_IPHONE
 			Handheld.Vibrate();
-			skin.transform.position = UnityEngine.Random.insideUnitCircle * 0.01f;
+#endif
+			skin.transform.position = UnityEngine.Random.insideUnitCircle * 0.03f;
 		} else {
 			skin.transform.position = Vector3.zero;
 		}
@@ -126,7 +129,7 @@ public class Game : MonoBehaviour {
 	}
 
 	private void ChangeColorState() {
-		FadeInHeadline( "Shade" );
+		FadeInHeadline( "Single Shade" );
 
 		TickTockSkinValue( 1.0f, 0.5f );
 
@@ -135,21 +138,17 @@ public class Game : MonoBehaviour {
 				StopCoroutine( skinTimer );
 			}
 			FadeOutHeadline( () => {
-				CatState();
+				ScratchState();
 			} );
 		};
 	}
 
-	private void CatState() {
-		FadeInHeadline( "Sleek Siamese" );
+	private void ScratchState() {
+		FadeInHeadline( "Irritating itch" );
 
-		SetTapAudio( clips.catMeow );
-		SetStrokeAudio( clips.catPurr );
+		SetStrokeAudio( clips.scratch );
 
 		OnNextButtonClicked = () => {
-			if( skinTimer != null ) {
-				StopCoroutine( skinTimer );
-			}
 			FadeOutHeadline( () => {
 				WomanState();
 			} );
@@ -163,6 +162,22 @@ public class Game : MonoBehaviour {
 		SetStrokeAudio( null );
 
 		OnNextButtonClicked = () => {
+			FadeOutHeadline( () => {
+				CatState();
+			} );
+		};
+	}
+
+	private void CatState() {
+		FadeInHeadline( "Sleek Siamese" );
+		
+		SetTapAudio( clips.catMeow );
+		SetStrokeAudio( clips.catPurr );
+		
+		OnNextButtonClicked = () => {
+			if( skinTimer != null ) {
+				StopCoroutine( skinTimer );
+			}
 			FadeOutHeadline( () => {
 				KnifeState();
 			} );
@@ -213,13 +228,13 @@ public class Game : MonoBehaviour {
 
 	private void FadeInHeadline( string text ) {
 		headlineText.text = text;
-		StartTimer( 2.0f, ( float dt ) => {
+		StartTimer( 1.0f, ( float dt ) => {
 			headlineTextAlpha = dt;
 		} );
 	}
 
 	private void FadeOutHeadline( Action done ) {
-		StartTimer( 2.0f, ( float dt ) => {
+		StartTimer( 1.0f, ( float dt ) => {
 			headlineTextAlpha = 1.0f - dt;
 		}, () => {
 			done();
@@ -248,6 +263,9 @@ public class Game : MonoBehaviour {
 			touchPos = mousePos;
 			if( !audioSource.isPlaying ) {
 				audioSource.Play();
+			}
+			if( strokeAudio != null ) {
+				audioSource.volume = strokeAudio.volume;
 			}
 			audioSource.UnPause();
 		};
@@ -440,6 +458,8 @@ public class Game : MonoBehaviour {
 	// Callback
 
 	public void NextButtonClicked() {
+		audioSource.Stop();
+		audioSource.PlayOneShot( whoosh.clip, whoosh.volume );
 		if( OnNextButtonClicked != null ) {
 			OnNextButtonClicked();
 		}
